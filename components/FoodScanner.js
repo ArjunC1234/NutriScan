@@ -34,7 +34,6 @@ export default function FoodScanner({ size, onScanned }) {
   }
   let scannedBool = false;
   const handler = async ({ type, data }) => {
-    console.log(type);
     if (type.startsWith("org.gs1.") && !scannedBool) {
       //
       setScanned(true);

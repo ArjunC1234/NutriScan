@@ -38,7 +38,7 @@ String.prototype.truncate =
 
 // GoogleGenerativeAI module
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const themeColor = "rgb(255, 255, 255)";
+const themeColor = "rgb(250, 245, 250)";
 
 export default function FoodView({ foods, setFoods, triggerOut }) {
   // Google Generative AI setup
@@ -142,32 +142,36 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
   // Function to render ingredients
   const renderIngredients = () => {
     return (
-      <ScrollView
-        contentContainerStyle={{
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Text style={[styles.listItem, { padding: 20 }]}>
-          {itemSelected.ingredients}
-        </Text>
-      </ScrollView>
+      <View style={{ flex: 1, backgroundColor: themeColor }}>
+        <ScrollView
+          contentContainerStyle={{
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text style={[styles.listItem, { padding: 20 }]}>
+            {itemSelected.ingredients}
+          </Text>
+        </ScrollView>
+      </View>
     );
   };
 
   // Function to render allergens
   const renderAllergens = () => {
     return (
-      <ScrollView
-        contentContainerStyle={{
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Text style={[styles.listItem, { padding: 20 }]}>
-          {itemSelected.allergens}
-        </Text>
-      </ScrollView>
+      <View style={{ flex: 1, backgroundColor: themeColor }}>
+        <ScrollView
+          contentContainerStyle={{
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text style={[styles.listItem, { padding: 20 }]}>
+            {itemSelected.allergens}
+          </Text>
+        </ScrollView>
+      </View>
     );
   };
 
@@ -183,26 +187,28 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
     }
 
     return (
-      <FlatList
-        style={styles.flatListStyle}
-        persistentScrollbar={true}
-        data={renderList}
-        renderItem={({ item }) => {
-          var disp =
-            item.name.truncate(20, true) +
-            ": " +
-            Math.round(item.serving) +
-            item.unit;
-          return (
-            <Text style={styles.listItem}>
-              <Text style={{ fontWeight: "bold" }}>
-                {item.name.truncate(20, true)}
+      <View style={{ flex: 1, backgroundColor: themeColor }}>
+        <FlatList
+          style={styles.flatListStyle}
+          persistentScrollbar={true}
+          data={renderList}
+          renderItem={({ item }) => {
+            var disp =
+              item.name.truncate(20, true) +
+              ": " +
+              Math.round(item.serving) +
+              item.unit;
+            return (
+              <Text style={styles.listItem}>
+                <Text style={{ fontWeight: "bold" }}>
+                  {item.name.truncate(20, true)}
+                </Text>
+                {": " + Math.round(item.serving) + item.unit}
               </Text>
-              {": " + Math.round(item.serving) + item.unit}
-            </Text>
-          );
-        }}
-      />
+            );
+          }}
+        />
+      </View>
     );
   };
 
@@ -231,7 +237,7 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
 
   return (
     // Main container view
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.toolbar}>
         <Button
           style={{ height: "100%", position: "absolute", left: 4 }}
@@ -247,7 +253,7 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
           onPress={toggleModal}
           disabled={foods.length == 0}
         >
-          Gemini
+          Gemini 1.0
         </Button>
       </View>
 
@@ -260,20 +266,19 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
                 height: Dimensions.get("window").height / 7,
                 justifyContent: "center",
                 alignItems: "center",
-                backgroundColor: "rgb(230, 230, 230)",
+                backgroundColor: "#f2edf8",
               }}
             >
               <Text style={[styles.header, { color: "rgb(60, 60, 60)" }]}>
-                {itemSelected.name.replaceAll("/,/g", "").truncate(15, true)}
+                {itemSelected.name
+                  .replaceAll(",", "")
+                  .replaceAll(/\b\w/g, (match) => match.toUpperCase())
+                  .truncate(20, true)}
               </Text>
               <Button
                 icon="magnify"
                 onPress={() => {
                   Linking.openURL(
-                    "https://www.google.com/search?q=" +
-                      itemSelected.categories.replaceAll(",", " OR")
-                  );
-                  console.log(
                     "https://www.google.com/search?q=" +
                       itemSelected.categories.replaceAll(",", " OR")
                   );
@@ -365,15 +370,21 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
             {/* Tab navigation for Ingredients, Allergens, and Nutrients */}
             <NavigationContainer
               initialRouteName="Ingredients"
-              screenOptions={{
-                tabBarActiveTintColor: "#e91e63",
-                tabBarLabelStyle: { fontSize: 12 },
-                tabBarStyle: { backgroundColor: "powderblue" },
-              }}
-              style={{ height: (Dimensions.get("window").height / 7) * 2 }}
+              style={{ height: (Dimensions.get("window").height / 7) * 2 + 50 }}
             >
               <Tab.Navigator
-                style={{ height: (Dimensions.get("window").height / 7) * 2 }}
+                screenOptions={{
+                  tabBarActiveTintColor: "#663399",
+                  tabBarLabelStyle: { fontSize: 12 },
+                  tabBarStyle: { backgroundColor: "rgb(250, 246  , 250)" },
+                  tabBarIndicatorStyle: {
+                    backgroundColor: "#ad90d5", // Change this to your desired color
+                    height: 2, // Adjust the height of the underline as needed
+                  },
+                }}
+                style={{
+                  height: (Dimensions.get("window").height / 7) * 2 + 50,
+                }}
               >
                 <Tab.Screen
                   name="Ingredients"
@@ -385,6 +396,7 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
                 ></Tab.Screen>
                 <Tab.Screen
                   name="Nutrients"
+                  contentContainerStyle={{ backgroundColor: themeColor }}
                   children={renderNutrients}
                 ></Tab.Screen>
               </Tab.Navigator>
@@ -417,7 +429,7 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
                       display: "flex",
                     }}
                   >
-                    <Text style={styles.header}>Gemini</Text>
+                    <Text style={styles.header}>Gemini 1.0</Text>
                   </View>
                   <View
                     style={{
@@ -511,7 +523,7 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
           <Text style={styles.body}>Scan Items to get started.</Text>
         </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -563,7 +575,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   toolbar: {
-    backgroundColor: themeColor,
+    backgroundColor: "white",
     width: Dimensions.get("window").width,
     top: 0,
     left: 0,
@@ -581,13 +593,16 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 40,
     textAlign: "center",
+    color: "rgb(60, 60, 60)",
   },
   subheader: {
     fontSize: 22,
     textAlign: "center",
+    color: "rgb(60, 60, 60)",
   },
   body: {
     fontSize: 15,
     textAlign: "center",
+    color: "rgb(60, 60, 60)",
   },
 });

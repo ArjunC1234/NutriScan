@@ -66,10 +66,10 @@ export default function App() {
       const json = await response.json();
       const myItem = {
         imageURL: json.product.image_url,
-        allergens:
-          json.product.allergens.length === 0
-            ? json.product.allergens_from_ingredients
-            : json.product.allergens,
+        allergens: (json.product.allergens.length === 0
+          ? json.product.allergens_from_ingredients
+          : json.product.allergens
+        ).replaceAll("en:", ""),
         keywords: json.product._keywords,
         brand: json.product.brands,
         name: json.product.product_name.replaceAll("/", ""),
