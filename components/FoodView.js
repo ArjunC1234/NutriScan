@@ -210,14 +210,20 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
   async function consultBard() {
     if (!(prompt == "")) {
       setResponse("Loading...");
-      initial =
-        prompt +
-        "\n Use this data '" +
-        JSON.stringify({ foodData: foods }) +
-        "', use ' ' instead of '_' when possible, use plain english, be concise but descriptive, use complete sentences, proffessional style, neutral tone, do not list data, avoid explicitly using object key names as a unit in the response (use '100g' for amount of nutrient per 100g, use 'serving' for amount of nutrient per serving, use 'energy_kcal' for calories when possible, use 'unit' for the unit of 'serving' or '100g', use 'serving_size' in root of food object to determine the serving size for any calculations)";
-      const result = await model.generateContent(initial);
-      const response = await result.response;
-      setResponse(response.text());
+      try {
+        initial =
+          prompt +
+          "\n Use this data '" +
+          JSON.stringify({ foodData: foods }) +
+          "', use ' ' instead of '_' when possible, use plain english, be concise but descriptive, use complete sentences, proffessional style, neutral tone, do not list data, avoid explicitly using object key names as a unit in the response (use '100g' for amount of nutrient per 100g, use 'serving' for amount of nutrient per serving, use 'energy_kcal' for calories when possible, use 'unit' for the unit of 'serving' or '100g', use 'serving_size' in root of food object to determine the serving size for any calculations)";
+        const result = await model.generateContent(initial);
+        const response = await result.response;
+        setResponse(response.text());
+      } catch (err) {
+        setResponse(
+          "An error has occured. It's possible that the developer has been rate limited. If this is the case, try again later, or contact the developer for support."
+        );
+      }
     } else {
       alert("Text input empty.");
     }
