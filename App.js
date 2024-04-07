@@ -144,7 +144,7 @@ export default function App() {
               }}
               icon="keyboard-backspace"
             >
-              Return To Comparison
+              Return to Comparison
             </Button>
             <Text style={styles.scanned}>{foodsList.length} item(s)</Text>
           </View>
