@@ -2,4 +2,6 @@ Nutrition app that allows users to scan food products, view their nutrition data
 
 Here is a video demo:
 
-https://github.com/ArjunC1234/NutriScan/assets/72848753/70071e49-60cc-45f9-8432-481763453fbb
+
+https://github.com/ArjunC1234/NutriScan/assets/72848753/7ea20835-78ce-4d42-8eb6-d71c1174b23e
+
