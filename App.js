@@ -1,5 +1,5 @@
 // Importing necessary modules from React Native
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Text, View, StyleSheet, Dimensions, SafeAreaView } from "react-native";
 import FoodView from "./components/FoodView";
 import { Button } from "react-native-paper";

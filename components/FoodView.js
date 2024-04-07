@@ -1,11 +1,10 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import {
   Text,
   View,
   StyleSheet,
   Dimensions,
   FlatList,
-  SafeAreaView,
   TouchableWithoutFeedback,
   Keyboard,
   Alert,
@@ -19,7 +18,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import Modal from "react-native-modal";
 import { TextInput, Button } from "react-native-paper";
 import Markdown from "react-native-markdown-display";
-import path from "path";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 // Extend String prototype to truncate text
 String.prototype.truncate =
@@ -51,7 +49,6 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
   const [modalVisibility, toggleModalVisibility] = useState(false);
   const [itemSelected, setSelectedItem] = useState(foods[0]);
   const [cMounted, mountC] = useState(true);
-  const [colors, setColors] = useState("null");
 
   const Tab = createMaterialTopTabNavigator();
 
@@ -109,11 +106,6 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
         </TouchableWithoutFeedback>
       </View>
     );
-  };
-
-  // Separator component for FlatList
-  const ItemSeparator = () => {
-    return <View style={styles.separator}></View>;
   };
 
   // Handler for snapping in Carousel
@@ -193,11 +185,6 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
           persistentScrollbar={true}
           data={renderList}
           renderItem={({ item }) => {
-            var disp =
-              item.name.truncate(20, true) +
-              ": " +
-              Math.round(item.serving) +
-              item.unit;
             return (
               <Text style={styles.listItem}>
                 <Text style={{ fontWeight: "bold" }}>
@@ -584,11 +571,6 @@ const styles = StyleSheet.create({
   },
   carousel: {
     width: Dimensions.get("window").width,
-  },
-  container: {
-    flex: 1,
-    flexDirection: "column",
-    justifyContent: "center",
   },
   header: {
     fontSize: 40,
