@@ -228,14 +228,14 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
     <SafeAreaView style={styles.container}>
       <View style={styles.toolbar}>
         <Button
-          style={{ height: "100%", position: "absolute", left: 0 }}
+          style={{ height: "100%", position: "absolute", left: 4 }}
           icon={"keyboard-backspace"}
           onPress={triggerOut}
         >
           Scan Items
         </Button>
         <Button
-          style={{ height: "100%", position: "absolute", right: 0 }}
+          style={{ height: "100%", position: "absolute", right: 4 }}
           contentStyle={{ flexDirection: "row-reverse" }}
           icon={"robot-outline"}
           onPress={toggleModal}
