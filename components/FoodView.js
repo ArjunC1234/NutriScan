@@ -10,6 +10,7 @@ import {
   Keyboard,
   Alert,
   ScrollView,
+  Linking,
 } from "react-native";
 import { Image } from "expo-image";
 import Carousel from "react-native-reanimated-carousel";
@@ -19,7 +20,7 @@ import Modal from "react-native-modal";
 import { TextInput, Button } from "react-native-paper";
 import Markdown from "react-native-markdown-display";
 import path from "path";
-
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 // Extend String prototype to truncate text
 String.prototype.truncate =
   String.prototype.truncate ||
@@ -259,9 +260,29 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
               <Text style={[styles.header, { color: "rgb(60, 60, 60)" }]}>
                 {itemSelected.name.replaceAll("/,/g", "").truncate(15, true)}
               </Text>
-              <Text style={[styles.subheader, { color: "rgb(100, 100, 100)" }]}>
+              <Button
+                icon="magnify"
+                onPress={() => {
+                  Linking.openURL(
+                    "https://www.google.com/search?q=" +
+                      itemSelected.categories.replaceAll(",", " OR")
+                  );
+                  console.log(
+                    "https://www.google.com/search?q=" +
+                      itemSelected.categories.replaceAll(",", " OR")
+                  );
+                }}
+                labelStyle={[
+                  styles.subheader,
+                  {
+                    color: "#663399",
+                    textDecorationLine: "underline",
+                    fontSize: 20,
+                  },
+                ]}
+              >
                 {itemSelected.categories.truncate(25, true)}
-              </Text>
+              </Button>
             </View>
 
             {/* Carousel of food items */}
@@ -290,12 +311,9 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
             <View
               style={{
                 height: Dimensions.get("window").height / 7 + 35,
-                backgroundColor: "#f9f0ff",
+                backgroundColor: "#f2edf8",
                 gap: 10,
                 padding: 10,
-                borderTopWidth: 2,
-                borderBottomWidth: 2,
-                borderColor: "rgb(200, 200, 200)",
               }}
             >
               <ScrollView>
@@ -455,9 +473,36 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
         </View>
       ) : (
         <View
-          style={{ flex: 20, alignItems: "center", justifyContent: "center" }}
+          style={{
+            flex: 20,
+            alignItems: "center",
+            justifyContent: "center",
+            shadowColor: "#663399",
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 1,
+            shadowRadius: 20,
+            elevation: 9,
+          }}
         >
-          <Text>No Foods have been scanned</Text>
+          <View
+            style={{
+              marginBottom: 5,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <MaterialCommunityIcons
+              name="magnify-scan"
+              size={50}
+              color="#663399"
+            />
+            <Text style={[styles.header, { color: "#663399" }]}>
+              {" "}
+              NutriScan
+            </Text>
+          </View>
+          <Text style={styles.body}>Scan Items to get started.</Text>
         </View>
       )}
     </SafeAreaView>
