@@ -1,9 +1,22 @@
 // Importing necessary modules from React Native
 import React, { useState } from "react";
-import { Text, View, StyleSheet, Dimensions, SafeAreaView } from "react-native";
+import {
+  Text,
+  View,
+  StyleSheet,
+  Dimensions,
+  SafeAreaView,
+  StatusBar,
+  Platform,
+} from "react-native";
 import FoodView from "./components/FoodView";
 import { Button } from "react-native-paper";
 import FoodScanner from "./components/FoodScanner";
+import { TabView, SceneMap } from "react-native-tab-view";
+import {
+  useSafeAreaInsets,
+  SafeAreaProvider,
+} from "react-native-safe-area-context";
 
 // Function to generate a random ID of specified length
 function makeid(length) {
@@ -11,10 +24,8 @@ function makeid(length) {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   const charactersLength = characters.length;
-  let counter = 0;
-  while (counter < length) {
+  for (let i = 0; i < length; i++) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    counter += 1;
   }
   return result;
 }
@@ -48,15 +59,15 @@ function removeUndefined(obj) {
 export default function App() {
   // State variables
   const [foodsList, setFoodsList] = useState([]);
-  const [showFoodsList, toggleFoodsList] = useState(true);
+  const [index, setIndex] = useState(1);
 
   // Handler function for scanning food items
   const scanHandler = async (type, data) => {
     try {
       const response = await fetch(
-        "https://world.openfoodfacts.org/api/v0/product/" +
-          data.substring(1) +
-          ".json"
+        `https://world.openfoodfacts.org/api/v0/product/${data.substring(
+          1
+        )}.json`
       );
 
       if (!response.ok) {
@@ -84,7 +95,6 @@ export default function App() {
         nutriscore_grade: json.product.nutriscore_grade,
         key: makeid(20),
       };
-
       // Extracting and formatting nutrient information
       for (const [key, value] of Object.entries(json.product.nutriments)) {
         if (!(key.split("_")[0].replaceAll("-", "_") in myItem.nutrients)) {
@@ -100,57 +110,117 @@ export default function App() {
 
       // Update foodsList state
       setFoodsList((prevFoodsList) => [...prevFoodsList, myItem]);
+      return true;
     } catch (error) {
       // Handle error if necessary
-      alert("Your item could not be found in the database.");
+      console.error(error);
+      return false;
+    }
+  };
+
+  // Scene for rendering Home tab
+  const HomeScene = ({ jump }) => (
+    <View style={{ flex: 1 }}>
+      <View
+        style={{
+          marginTop:
+            Platform.OS === "ios"
+              ? useSafeAreaInsets().top
+              : StatusBar.currentHeight,
+          flex: 1,
+        }}
+      >
+        <FoodView
+          style={{ flex: 1, display: "flex" }}
+          foods={foodsList}
+          setFoods={setFoodsList}
+          triggerOut={() => {
+            jump("scan");
+          }}
+        />
+      </View>
+    </View>
+  );
+
+  // Scene for rendering Scan tab
+  const ScanScene = ({ jump }) => (
+    <View
+      style={{
+        flex: 1,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <View style={styles.camera}>
+        <FoodScanner
+          size={[styles.camera.width, styles.camera.height]}
+          onScanned={scanHandler}
+          onScanHandlerTrue={() => {
+            jump("home");
+          }}
+        />
+      </View>
+      <Button
+        style={[
+          styles.return,
+          {
+            top:
+              Platform.OS === "ios"
+                ? useSafeAreaInsets().top
+                : StatusBar.currentHeight,
+          },
+        ]}
+        onPress={() => {
+          jump("home");
+        }}
+        icon="arrow-u-right-bottom"
+      >
+        Return
+      </Button>
+    </View>
+  );
+
+  // Routes configuration
+  const routes = [
+    { key: "scan", title: "Scan" },
+    { key: "home", title: "Home" },
+  ];
+
+  // Render scene based on route
+  const renderScene = ({ route, jumpTo }) => {
+    switch (route.key) {
+      case "home":
+        return <HomeScene jump={jumpTo} />;
+      case "scan":
+        return <ScanScene jump={jumpTo} />;
+      default:
+        return null;
     }
   };
 
   return (
     // Main container view
-    <View style={styles.container}>
-      {/* Camera view */}
-      {showFoodsList ? (
-        <SafeAreaView style={{ flex: 1 }}>
-          <FoodView
-            style={{ flex: 1, display: "flex" }}
-            foods={foodsList}
-            setFoods={setFoodsList}
-            triggerOut={() => {
-              toggleFoodsList(false);
-            }}
-          />
-        </SafeAreaView>
-      ) : (
-        <View
-          style={{
-            flex: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <View style={styles.camera}>
-            <FoodScanner
-              size={[styles.camera.width, styles.camera.height]}
-              onScanned={scanHandler}
-            />
-          </View>
-          <View style={styles.toolbar}>
-            <Button
-              style={styles.return}
-              onPress={() => {
-                toggleFoodsList(true);
-              }}
-              icon="keyboard-backspace"
-            >
-              Return to Comparison
-            </Button>
-            <Text style={styles.scanned}>{foodsList.length} item(s)</Text>
-          </View>
-        </View>
-      )}
-    </View>
+    <SafeAreaProvider>
+      <TabView
+        renderTabBar={() => null}
+        navigationState={{ index, routes }}
+        renderScene={renderScene}
+        onIndexChange={setIndex}
+        initialLayout={[
+          styles.container,
+          { width: Dimensions.get("window").width },
+        ]}
+        renderLazyPlaceholder={() => (
+          <SafeAreaView
+            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+          >
+            <Text>Loading...</Text>
+          </SafeAreaView>
+        )}
+        lazy={({ route }) => route.key === "scan"}
+      />
+    </SafeAreaProvider>
   );
 }
 
@@ -174,14 +244,14 @@ const styles = StyleSheet.create({
   },
   return: {
     position: "absolute",
-    left: 5,
-    top: 0,
+    left: 15,
     height: 50,
     borderTopRightRadius: 35,
     borderBottomRightRadius: 35,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
   },
   camera: {
     position: "absolute",

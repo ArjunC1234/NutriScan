@@ -225,32 +225,31 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
   return (
     // Main container view
     <View style={styles.container}>
-      <View style={styles.toolbar}>
-        <Button
-          style={{ height: "100%", position: "absolute", left: 4 }}
-          icon={"keyboard-backspace"}
-          onPress={triggerOut}
-        >
-          Scan Items
-        </Button>
-        <Button
-          style={{ height: "100%", position: "absolute", right: 4 }}
-          contentStyle={{ flexDirection: "row-reverse" }}
-          icon={"robot-outline"}
-          onPress={toggleModal}
-          disabled={foods.length == 0}
-        >
-          Gemini 1.0
-        </Button>
-      </View>
+      <Button
+        style={{ height: "100%", position: "absolute", left: 4 }}
+        icon={"keyboard-backspace"}
+        onPress={triggerOut}
+      >
+        Scan Items
+      </Button>
+      <Button
+        style={{ height: "100%", position: "absolute", right: 4 }}
+        contentStyle={{ flexDirection: "row-reverse" }}
+        icon={"robot-outline"}
+        onPress={toggleModal}
+        disabled={foods.length == 0}
+      >
+        Gemini 1.0
+      </Button>
 
       {foods.length > 0 ? (
-        <View style={{ flex: 20 }}>
+        <View style={{ flex: 20, position: "absolute", top: 41 }}>
           <View style={styles.container}>
             {/* Food information */}
             <View
               style={{
-                height: Dimensions.get("window").height / 7,
+                height: Dimensions.get("window").height / 8,
+                width: "100%",
                 justifyContent: "center",
                 alignItems: "center",
                 backgroundColor: "#f2edf8",
@@ -309,6 +308,7 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
             <View
               style={{
                 height: Dimensions.get("window").height / 7 + 35,
+                width: "100%",
                 backgroundColor: "#f2edf8",
                 gap: 10,
                 padding: 10,
@@ -357,7 +357,10 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
             {/* Tab navigation for Ingredients, Allergens, and Nutrients */}
             <NavigationContainer
               initialRouteName="Ingredients"
-              style={{ height: (Dimensions.get("window").height / 7) * 2 + 50 }}
+              style={{
+                height: (Dimensions.get("window").height / 7) * 2,
+                width: "100%",
+              }}
             >
               <Tab.Navigator
                 screenOptions={{
@@ -370,7 +373,8 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
                   },
                 }}
                 style={{
-                  height: (Dimensions.get("window").height / 7) * 2 + 50,
+                  height: (Dimensions.get("window").height / 7) * 2,
+                  width: "100%",
                 }}
               >
                 <Tab.Screen
@@ -519,6 +523,9 @@ const styles = StyleSheet.create({
   info: {
     flex: 1,
   },
+  flatListStyle: {
+    marginBottom: 10,
+  },
   container: {
     flex: 1,
     display: "flex",
@@ -563,7 +570,7 @@ const styles = StyleSheet.create({
   },
   toolbar: {
     backgroundColor: "white",
-    width: Dimensions.get("window").width,
+    width: "100%",
     top: 0,
     left: 0,
     flex: 1,

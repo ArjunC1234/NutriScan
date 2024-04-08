@@ -10,7 +10,7 @@ import {
 import { CameraView, useCameraPermissions } from "expo-camera/next";
 import { VideoStabilization } from "expo-camera";
 
-export default function FoodScanner({ size, onScanned }) {
+export default function FoodScanner({ size, onScanned, onScanHandlerTrue }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const mounted = useRef(false);
@@ -25,43 +25,45 @@ export default function FoodScanner({ size, onScanned }) {
 
   if (!permission) {
     requestPermission();
-    return <Text>Requesting for camera permission</Text>;
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <Text>Requesting for camera permission.</Text>
+      </View>
+    );
   }
 
   if (!permission.granted) {
-    requestPermission();
-    return <Text>No access to camera</Text>;
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <Text>No access to camera.</Text>
+      </View>
+    );
   }
   let scannedBool = false;
   const handler = async ({ type, data }) => {
     if (type.startsWith("org.gs1.") && !scannedBool) {
-      //
       setScanned(true);
-      onScanned(type, data);
+      if (!onScanned(type, data)) {
+        alert("Your item could not be found in the database.");
+        setScanned(false);
+      } else {
+        alert("Added item.");
+        onScanHandlerTrue();
+      }
     }
   };
 
   return (
     <View style={styles.container}>
       {mounted && (
-        <CameraView
-          onBarcodeScanned={scanned ? undefined : handler}
-          style={{ width: size[0], height: size[1] }}
-          zoom={0}
-        />
-      )}
-      {scanned && (
-        <TouchableOpacity
-          style={[styles.btn, { width: size[0], height: size[1] + 50 }]}
-          onPress={() => {
-            setScanned(false);
-            scannedBool = false;
-          }}
-        >
-          <Text style={[{ color: "white", fontSize: size[0] / 10 }]}>
-            Tap to Scan Again
-          </Text>
-        </TouchableOpacity>
+        <View>
+          <CameraView
+            onBarcodeScanned={scanned ? undefined : handler}
+            style={{ width: size[0], height: size[1] }}
+            zoom={0}
+          />
+          <View style={styles.overlay} />
+        </View>
       )}
     </View>
   );
@@ -84,5 +86,9 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "transparent",
   },
 });
