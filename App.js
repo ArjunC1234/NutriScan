@@ -218,7 +218,9 @@ export default function App() {
             <Text>Loading...</Text>
           </SafeAreaView>
         )}
-        lazy={({ route }) => route.key === "scan"}
+        lazy={({ route }) => {
+          return route.key === "scan";
+        }}
       />
     </SafeAreaProvider>
   );
