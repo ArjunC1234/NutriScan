@@ -169,28 +169,19 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
 
   // Function to render nutrients
   const renderNutrients = () => {
-    var renderList = [];
-    for (const [key, value] of Object.entries(itemSelected.nutrients)) {
-      if ("serving" in value && "unit" in value) {
-        v = value;
-        v.name = key.replaceAll("/_/g", " ");
-        renderList.push(v);
-      }
-    }
-
     return (
       <View style={{ flex: 1, backgroundColor: themeColor }}>
         <FlatList
           style={styles.flatListStyle}
           persistentScrollbar={true}
-          data={renderList}
+          data={itemSelected.nutrients}
           renderItem={({ item }) => {
             return (
               <Text style={styles.listItem}>
                 <Text style={{ fontWeight: "bold" }}>
                   {item.name.truncate(20, true)}
                 </Text>
-                {": " + Math.round(item.serving) + item.unit}
+                {": " + item.value}
               </Text>
             );
           }}
@@ -331,7 +322,8 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
                   ]}
                 >
                   <Text style={{ fontWeight: "bold" }}>Serving: </Text>
-                  {itemSelected.serving_size}
+                  {itemSelected.serving_quantity +
+                    itemSelected.serving_quantity_unit}
                 </Text>
                 <Text
                   style={[
