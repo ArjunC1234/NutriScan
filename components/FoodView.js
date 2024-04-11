@@ -215,7 +215,7 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
 
   return (
     // Main container view
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: "white" }]}>
       <Button
         style={{ height: "100%", position: "absolute", left: 4 }}
         icon={"keyboard-backspace"}

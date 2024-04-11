@@ -60,23 +60,26 @@ export default function App() {
   // State variables
   const [foodsList, setFoodsList] = useState([]);
   const [index, setIndex] = useState(1);
-
+  const client = new Client({
+    api_key: process.env.EXPO_PUBLIC_FOODDATA_API_KEY,
+  });
   // Handler function for scanning food items
   const scanHandler = async (type, data) => {
     try {
-      const client = new Client({
-        api_key: process.env.EXPO_PUBLIC_FOODDATA_API_KEY,
-      });
-
       // search foods based on an input
       const results = await client.search({
-        generalSearchInput: data.substring(1),
+        generalSearchInput: "0" + data,
       });
 
       if (results.success) {
         // get details for food item
+        if (results.data.foods[0] == undefined) {
+          return false;
+        }
         const details = await client.details(results.data.foods[0].fdcId);
-
+        if (details === undefined) {
+          return false;
+        }
         if (details.success) {
           const response = await fetch(
             `https://world.openfoodfacts.org/api/v0/product/${data.substring(
@@ -99,7 +102,7 @@ export default function App() {
                 ? json.product.allergens_from_ingredients
                 : json.product.allergens
               ).replaceAll("en:", "") ||
-              "Either no allergens are present or none were found",
+              "Either no allergens are present or none were found.",
             keywords: json.product._keywords,
             brand: details.data.brandName,
             name: details.data.description,
@@ -129,7 +132,11 @@ export default function App() {
           // Update foodsList state
           setFoodsList((prevFoodsList) => [...prevFoodsList, myItem]);
           return true;
+        } else {
+          return false;
         }
+      } else {
+        return false;
       }
 
       // Extracting and formatting nutrient information
