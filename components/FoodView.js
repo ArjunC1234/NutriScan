@@ -250,7 +250,7 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
                 {itemSelected.name
                   .replaceAll(",", "")
                   .replaceAll(/\b\w/g, (match) => match.toUpperCase())
-                  .truncate(20, true)}
+                  .truncate(15, true)}
               </Text>
               <Button
                 icon="magnify"

@@ -68,12 +68,11 @@ export default function App() {
     try {
       // search foods based on an input
       const results = await client.search({
-        generalSearchInput: "0" + data,
+        generalSearchInput: data.substring(1),
       });
 
       if (results.success) {
-        // get details for food item
-        if (results.data.foods[0] == undefined) {
+        if (results.data.foods.length == 0) {
           return false;
         }
         const details = await client.details(results.data.foods[0].fdcId);
@@ -113,7 +112,8 @@ export default function App() {
             serving_quantity: details.data.servingSize,
             serving_quantity_unit: details.data.servingSizeUnit,
             total_quantity: json.product.quantity || "(not found)",
-            nutriscore_grade: json.product.nutriscore_grade || "(not found)",
+            nutriscore_grade:
+              json.product.nutriscore_grade.toUpperCase() || "(not found)",
             key: makeid(20),
           };
           for (var x = 0; x < details.data.foodNutrients.length; x++) {
@@ -143,8 +143,8 @@ export default function App() {
     } catch (error) {
       // Handle error if necessary
       console.error(error);
+      return false;
     }
-    return false;
   };
 
   // Scene for rendering Home tab

@@ -42,9 +42,8 @@ export default function FoodScanner({ size, onScanned, onScanHandlerTrue }) {
   }
   let scannedBool = false;
   async function handler({ type, data }) {
-    if (type.startsWith("org.gs1.") && !scannedBool) {
+    if (type.startsWith("org.gs1.")) {
       setScanned(true);
-      scannedBool = true;
       val = await onScanned(type, data);
       if (!val) {
         Alert.alert("Your item could not be found in the database.", "", [
@@ -57,7 +56,7 @@ export default function FoodScanner({ size, onScanned, onScanHandlerTrue }) {
           },
         ]);
       } else {
-        onScanHandlerTrue();
+        await onScanHandlerTrue();
       }
     }
   }
