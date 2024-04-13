@@ -169,28 +169,19 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
 
   // Function to render nutrients
   const renderNutrients = () => {
-    var renderList = [];
-    for (const [key, value] of Object.entries(itemSelected.nutrients)) {
-      if ("serving" in value && "unit" in value) {
-        v = value;
-        v.name = key.replaceAll("/_/g", " ");
-        renderList.push(v);
-      }
-    }
-
     return (
       <View style={{ flex: 1, backgroundColor: themeColor }}>
         <FlatList
           style={styles.flatListStyle}
           persistentScrollbar={true}
-          data={renderList}
+          data={itemSelected.nutrients}
           renderItem={({ item }) => {
             return (
               <Text style={styles.listItem}>
                 <Text style={{ fontWeight: "bold" }}>
                   {item.name.truncate(20, true)}
                 </Text>
-                {": " + Math.round(item.serving) + item.unit}
+                {": " + item.value}
               </Text>
             );
           }}
@@ -224,7 +215,7 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
 
   return (
     // Main container view
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: "white" }]}>
       <Button
         style={{ height: "100%", position: "absolute", left: 4 }}
         icon={"keyboard-backspace"}
@@ -259,7 +250,7 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
                 {itemSelected.name
                   .replaceAll(",", "")
                   .replaceAll(/\b\w/g, (match) => match.toUpperCase())
-                  .truncate(20, true)}
+                  .truncate(15, true)}
               </Text>
               <Button
                 icon="magnify"
@@ -331,7 +322,8 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
                   ]}
                 >
                   <Text style={{ fontWeight: "bold" }}>Serving: </Text>
-                  {itemSelected.serving_size}
+                  {itemSelected.serving_quantity +
+                    itemSelected.serving_quantity_unit}
                 </Text>
                 <Text
                   style={[

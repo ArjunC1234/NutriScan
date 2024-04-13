@@ -6,6 +6,7 @@ import {
   Button,
   Platform,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera/next";
 import { VideoStabilization } from "expo-camera";
@@ -40,18 +41,25 @@ export default function FoodScanner({ size, onScanned, onScanHandlerTrue }) {
     );
   }
   let scannedBool = false;
-  const handler = async ({ type, data }) => {
-    if (type.startsWith("org.gs1.") && !scannedBool) {
+  async function handler({ type, data }) {
+    if (type.startsWith("org.gs1.")) {
       setScanned(true);
-      if (!onScanned(type, data)) {
-        alert("Your item could not be found in the database.");
-        setScanned(false);
+      val = await onScanned(type, data);
+      if (!val) {
+        Alert.alert("Your item could not be found in the database.", "", [
+          {
+            text: "OK",
+            onPress: () => {
+              setScanned(false);
+              scannedBool = false;
+            },
+          },
+        ]);
       } else {
-        alert("Added item.");
-        onScanHandlerTrue();
+        await onScanHandlerTrue();
       }
     }
-  };
+  }
 
   return (
     <View style={styles.container}>
