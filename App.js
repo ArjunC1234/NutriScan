@@ -29,7 +29,27 @@ function makeid(length) {
   }
   return result;
 }
-
+var returnTypes = (barcode, type) => {
+  typeObj = {};
+  if (type.startsWith("EAN")) {
+    typeObj.EAN = barcode;
+    typeObj.GTIN = "0" + barcode;
+    if (barcode.startsWith("0")) {
+      typeObj.UPC = barcode.substring(1);
+    }
+  } else if (type.startsWith("GTIN")) {
+    typeObj.GTIN = barcode;
+    typeObj.EAN = barcode.substring(1);
+    if (barcode.startsWith("00")) {
+      typeObj.UPC = barcode.substring(2);
+    }
+  } else if (type.startsWith("UPC")) {
+    typeObj.UPC = barcode;
+    typeObj.EAN = "0" + barcode;
+    typeObj.GTIN = "00" + barcode;
+  }
+  return typeObj;
+};
 // Function to check if a value is null or undefined
 function nullCheck(value) {
   if (
@@ -66,79 +86,90 @@ export default function App() {
   // Handler function for scanning food items
   const scanHandler = async (type, data) => {
     try {
+      let code = data;
       // search foods based on an input
-      const results = await client.search({
-        generalSearchInput: data.substring(1),
-      });
+      let codes = returnTypes(data, type.split(".")[2]);
+      for (const [key, value] of Object.entries(codes)) {
+        const results = await client.search({
+          generalSearchInput: value,
+        });
 
-      if (results.success) {
-        if (results.data.foods.length == 0) {
-          return false;
-        }
-        const details = await client.details(results.data.foods[0].fdcId);
-        if (details === undefined) {
-          return false;
-        }
-        if (details.success) {
-          const response = await fetch(
-            `https://world.openfoodfacts.org/api/v0/product/${data.substring(
-              1
-            )}.json`
-          );
-
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
+        if (results.success) {
+          if (results.data.foods.length == 0) {
+            continue;
           }
-
-          const json = await response.json();
-
-          const myItem = {
-            imageURL:
-              json.product.image_url ||
-              "https://st4.depositphotos.com/17828278/24401/v/450/depositphotos_244011872-stock-illustration-image-vector-symbol-missing-available.jpg",
-            allergens:
-              (json.product.allergens.length === 0
-                ? json.product.allergens_from_ingredients
-                : json.product.allergens
-              ).replaceAll("en:", "") ||
-              "Either no allergens are present or none were found.",
-            keywords: json.product._keywords,
-            brand: details.data.brandName,
-            name: details.data.description,
-            categories: details.data.brandedFoodCategory,
-            code: json.product.code,
-            ingredients: details.data.ingredients,
-            nutrients: [],
-            serving_quantity: details.data.servingSize,
-            serving_quantity_unit: details.data.servingSizeUnit,
-            total_quantity: json.product.quantity || "(not found)",
-            nutriscore_grade:
-              json.product.nutriscore_grade.toUpperCase() || "(not found)",
-            key: makeid(20),
-          };
-          for (var x = 0; x < details.data.foodNutrients.length; x++) {
-            i = details.data.foodNutrients[x];
-            myItem.nutrients.push({
-              name: i.nutrient.name,
-              value:
-                Math.round(i.amount * (myItem.serving_quantity / 100)) +
-                i.nutrient.unitName,
-            });
+          const details = await client.details(results.data.foods[0].fdcId);
+          if (details === undefined) {
+            continue;
           }
+          if (details.success) {
+            const response = await fetch(
+              `https://world.openfoodfacts.org/api/v0/product/${data}.json`
+            );
 
-          // Remove undefined properties from the item
-          removeUndefined(myItem);
+            if (!response.ok) {
+              continue;
+            }
 
-          // Update foodsList state
-          setFoodsList((prevFoodsList) => [...prevFoodsList, myItem]);
-          return true;
+            const json = await response.json();
+            if (!("product" in json)) {
+              json = { product: {} };
+              json.product.image_url =
+                "https://st4.depositphotos.com/17828278/24401/v/450/depositphotos_244011872-stock-illustration-image-vector-symbol-missing-available.jpg";
+              json.product.allergens = "No allergen information was found.";
+              json.product.code = data;
+              json.product.quantity = "(not found)";
+              json.product.nutriscore_grade = "(not found)";
+              json.product._keywords = "(not found)";
+            }
+            const myItem = {
+              imageURL:
+                json.product.image_url ||
+                "https://st4.depositphotos.com/17828278/24401/v/450/depositphotos_244011872-stock-illustration-image-vector-symbol-missing-available.jpg",
+              allergens:
+                (json.product.allergens.length === 0
+                  ? json.product.allergens_from_ingredients
+                  : json.product.allergens
+                ).replaceAll("en:", "") ||
+                "Either no allergens are present or none were found.",
+              keywords: json.product._keywords,
+              brand: details.data.brandName,
+              name: details.data.description,
+              categories: details.data.brandedFoodCategory,
+              code: json.product.code,
+              ingredients: details.data.ingredients,
+              nutrients: [],
+              serving_quantity: details.data.servingSize,
+              serving_quantity_unit: details.data.servingSizeUnit,
+              total_quantity: json.product.quantity || "(not found)",
+              nutriscore_grade:
+                json.product.nutriscore_grade.toUpperCase() || "(not found)",
+              key: makeid(20),
+            };
+            for (var x = 0; x < details.data.foodNutrients.length; x++) {
+              i = details.data.foodNutrients[x];
+              myItem.nutrients.push({
+                name: i.nutrient.name,
+                value:
+                  Math.round(i.amount * (myItem.serving_quantity / 100)) +
+                  i.nutrient.unitName,
+              });
+            }
+
+            // Remove undefined properties from the item
+            removeUndefined(myItem);
+
+            // Update foodsList state
+            setFoodsList((prevFoodsList) => [...prevFoodsList, myItem]);
+            return true;
+          } else {
+            continue;
+          }
         } else {
-          return false;
+          continue;
         }
-      } else {
-        return false;
       }
-
+      return false;
       // Extracting and formatting nutrient information
     } catch (error) {
       // Handle error if necessary
