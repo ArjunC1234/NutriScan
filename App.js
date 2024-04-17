@@ -86,7 +86,6 @@ export default function App() {
   // Handler function for scanning food items
   const scanHandler = async (type, data) => {
     try {
-      let code = data;
       // search foods based on an input
       let codes = returnTypes(data, type.split(".")[2]);
       for (const [key, value] of Object.entries(codes)) {
@@ -161,6 +160,7 @@ export default function App() {
 
             // Update foodsList state
             setFoodsList((prevFoodsList) => [...prevFoodsList, myItem]);
+
             return true;
           } else {
             continue;
@@ -173,7 +173,7 @@ export default function App() {
       // Extracting and formatting nutrient information
     } catch (error) {
       // Handle error if necessary
-      console.error(error);
+      console.log(error);
       return false;
     }
   };

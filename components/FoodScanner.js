@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
+import { PaperProvider, Portal, Snackbar } from "react-native-paper";
 import { CameraView, useCameraPermissions } from "expo-camera/next";
 import { VideoStabilization } from "expo-camera";
 function isValidBarcode(value) {
@@ -28,6 +29,7 @@ function isValidBarcode(value) {
 export default function FoodScanner({ size, onScanned, onScanHandlerTrue }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
+  const [snackVis, setSnackVis] = useState(false);
   const mounted = useRef(false);
 
   useEffect(() => {
@@ -58,8 +60,10 @@ export default function FoodScanner({ size, onScanned, onScanHandlerTrue }) {
   async function handler({ type, data }) {
     if (type.startsWith("org.gs1.")) {
       setScanned(true);
+      setSnackVis(true);
       val = await onScanned(type, data);
       if (!val) {
+        setSnackVis(false);
         Alert.alert("Your item could not be found in the database.", "", [
           {
             text: "OK",
@@ -70,6 +74,7 @@ export default function FoodScanner({ size, onScanned, onScanHandlerTrue }) {
           },
         ]);
       } else {
+        setSnackVis(false);
         await onScanHandlerTrue();
       }
     }
@@ -87,6 +92,14 @@ export default function FoodScanner({ size, onScanned, onScanHandlerTrue }) {
           <View style={styles.overlay} />
         </View>
       )}
+      <Snackbar
+        visible={snackVis}
+        onDismiss={() => {
+          setSnackVis(false);
+        }}
+      >
+        Querying databases...
+      </Snackbar>
     </View>
   );
 }
