@@ -115,7 +115,7 @@ export default function App() {
               continue;
             }
 
-            const json = await response.json();
+            var json = await response.json();
             if (!("product" in json)) {
               json = { product: {} };
               json.product.image_url =
