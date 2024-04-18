@@ -114,7 +114,7 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
   };
 
   // Function to render carousel of food items
-  const renderCarousel = () => {
+  const RenderCarousel = () => {
     return (
       <View style={styles.carousel}>
         <Carousel
@@ -292,7 +292,7 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
               >
                 Double tap to remove item
               </Text>
-              {cMounted && renderCarousel()}
+              {cMounted ? <RenderCarousel /> : null}
             </View>
 
             {/* Additional information */}

@@ -30,13 +30,15 @@ export default function FoodScanner({ size, onScanned, onScanHandlerTrue }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [snackVis, setSnackVis] = useState(false);
-  const mounted = useRef(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    mounted.current = true;
+    setMounted(true);
+    console.log("hi World");
 
     return () => {
-      mounted.current = false;
+      setMounted(false);
+      console.log("hello world");
     };
   }, []);
 
@@ -75,14 +77,14 @@ export default function FoodScanner({ size, onScanned, onScanHandlerTrue }) {
         ]);
       } else {
         setSnackVis(false);
-        await onScanHandlerTrue();
+        onScanHandlerTrue();
       }
     }
   }
 
   return (
     <View style={styles.container}>
-      {mounted && (
+      {mounted ? (
         <View>
           <CameraView
             onBarcodeScanned={scanned ? undefined : handler}
@@ -91,7 +93,7 @@ export default function FoodScanner({ size, onScanned, onScanHandlerTrue }) {
           />
           <View style={styles.overlay} />
         </View>
-      )}
+      ) : null}
       <Snackbar
         visible={snackVis}
         onDismiss={() => {

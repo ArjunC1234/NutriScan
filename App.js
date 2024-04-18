@@ -1,5 +1,5 @@
 // Importing necessary modules from React Native
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Text,
   View,
@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   StatusBar,
   Platform,
+  LogBox,
 } from "react-native";
 import FoodView from "./components/FoodView";
 import { Button } from "react-native-paper";
@@ -18,6 +19,10 @@ import {
   SafeAreaProvider,
 } from "react-native-safe-area-context";
 import Client from "fooddata-central";
+import Swiper from "react-native-swiper";
+LogBox.ignoreLogs([
+  "VirtualizedLists should never be nested inside plain ScrollViews",
+]);
 // Function to generate a random ID of specified length
 function makeid(length) {
   let result = "";
@@ -178,6 +183,7 @@ export default function App() {
     }
   };
 
+  const swipeRef = useRef(null);
   // Scene for rendering Home tab
   const HomeScene = ({ jump }) => (
     <View style={{ flex: 1 }}>
@@ -195,7 +201,7 @@ export default function App() {
           foods={foodsList}
           setFoods={setFoodsList}
           triggerOut={() => {
-            jump("scan");
+            jump();
           }}
         />
       </View>
@@ -217,7 +223,7 @@ export default function App() {
           size={[styles.camera.width, styles.camera.height]}
           onScanned={scanHandler}
           onScanHandlerTrue={() => {
-            jump("home");
+            jump();
           }}
         />
       </View>
@@ -246,14 +252,14 @@ export default function App() {
     { key: "scan", title: "Scan" },
     { key: "home", title: "Home" },
   ];
-
+  const [indexShow, setMyIndex] = useState(1);
   // Render scene based on route
   const renderScene = ({ route, jumpTo }) => {
     switch (route.key) {
       case "home":
         return <HomeScene jump={jumpTo} />;
       case "scan":
-        return <ScanScene jump={jumpTo} />;
+        return;
       default:
         return null;
     }
@@ -262,26 +268,36 @@ export default function App() {
   return (
     // Main container view
     <SafeAreaProvider>
-      <TabView
-        renderTabBar={() => null}
-        navigationState={{ index, routes }}
-        renderScene={renderScene}
-        onIndexChange={setIndex}
-        initialLayout={[
-          styles.container,
-          { width: Dimensions.get("window").width },
-        ]}
-        renderLazyPlaceholder={() => (
-          <SafeAreaView
-            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-          >
-            <Text>Loading...</Text>
-          </SafeAreaView>
-        )}
-        lazy={({ route }) => {
-          return route.key === "scan";
+      <Swiper
+        loop={false}
+        ref={swipeRef}
+        index={1}
+        showsPagination={false}
+        onIndexChanged={(i) => {
+          if (i == 1) {
+            setMyIndex(1);
+          } else {
+            setMyIndex(0);
+          }
         }}
-      />
+      >
+        <View style={{ flex: 1 }}>
+          {indexShow == 0 ? (
+            <ScanScene
+              jump={() => {
+                swipeRef.current.scrollBy(1);
+              }}
+            />
+          ) : null}
+        </View>
+        <View style={{ flex: 1 }}>
+          <HomeScene
+            jump={() => {
+              swipeRef.current.scrollBy(-1);
+            }}
+          />
+        </View>
+      </Swiper>
     </SafeAreaProvider>
   );
 }
