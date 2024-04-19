@@ -213,13 +213,15 @@ export default function App() {
       }}
     >
       <View style={styles.camera}>
-        <FoodScanner
-          size={[styles.camera.width, styles.camera.height]}
-          onScanned={scanHandler}
-          onScanHandlerTrue={() => {
-            jump("home");
-          }}
-        />
+        {renderCam && (
+          <FoodScanner
+            size={[styles.camera.width, styles.camera.height]}
+            onScanned={scanHandler}
+            onScanHandlerTrue={() => {
+              jump("home");
+            }}
+          />
+        )}
       </View>
       <Button
         style={[
@@ -259,6 +261,8 @@ export default function App() {
     }
   };
 
+  const [renderCam, setRenderCam] = useState(false);
+
   return (
     // Main container view
     <SafeAreaProvider>
@@ -266,7 +270,10 @@ export default function App() {
         renderTabBar={() => null}
         navigationState={{ index, routes }}
         renderScene={renderScene}
-        onIndexChange={setIndex}
+        onIndexChange={(i) => {
+          setRenderCam(i == 0);
+          setIndex(i);
+        }}
         initialLayout={[
           styles.container,
           { width: Dimensions.get("window").width },
@@ -277,10 +284,10 @@ export default function App() {
           >
             <Text>Loading...</Text>
           </SafeAreaView>
-        )}
+        )} /*
         lazy={({ route }) => {
           return route.key === "scan";
-        }}
+        }}*/
       />
     </SafeAreaProvider>
   );
