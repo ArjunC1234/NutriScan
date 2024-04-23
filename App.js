@@ -217,8 +217,8 @@ export default function App() {
           <FoodScanner
             size={[styles.camera.width, styles.camera.height]}
             onScanned={scanHandler}
-            onScanHandlerTrue={() => {
-              jump("home");
+            onScanHandlerTrue={async () => {
+              await jump("home");
             }}
           />
         )}

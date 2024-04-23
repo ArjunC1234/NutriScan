@@ -196,10 +196,11 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
       setResponse("Loading...");
       try {
         initial =
+          "Question: " +
           prompt +
-          "\n Use this data '" +
+          "\n\n Assume this data is correct: '" +
           JSON.stringify({ foodData: foods }) +
-          "', use ' ' instead of '_' when possible, use plain english, be concise but descriptive, use complete sentences, proffessional style, neutral tone, do not list data, avoid explicitly using object key names as a unit in the response (use '100g' for amount of nutrient per 100g, use 'serving' for amount of nutrient per serving, use 'energy_kcal' for calories when possible, use 'unit' for the unit of 'serving' or '100g', use 'serving_size' in root of food object to determine the serving size for any calculations)";
+          "'. Answer the question as best as possible using both the data provided OR any knowledge in your own database. Only answer relevant questions AND DO NOT try and interpret nonsensical questions. If a question is irrelevant or does not make sense, answer with 'I do not understand your question. Please rephrase.' Use ' ' instead of '_' when possible, use plain english, be concise but descriptive, use complete sentences, proffessional style, neutral tone, do not list data, avoid explicitly using object key names as a unit in the response (all nutrient measurements are per serving; do any necessary calculations based on that information)";
         const result = await model.generateContent(initial);
         const response = await result.response;
         setResponse(response.text());

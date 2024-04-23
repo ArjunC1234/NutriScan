@@ -74,6 +74,7 @@ export default function FoodScanner({ size, onScanned, onScanHandlerTrue }) {
           },
         ]);
       } else {
+        mounted.current = false;
         setSnackVis(false);
         await onScanHandlerTrue();
       }
