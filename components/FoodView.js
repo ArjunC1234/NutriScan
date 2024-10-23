@@ -19,6 +19,7 @@ import Modal from "react-native-modal";
 import { TextInput, Button } from "react-native-paper";
 import Markdown from "react-native-markdown-display";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+
 // Extend String prototype to truncate text
 String.prototype.truncate =
   String.prototype.truncate ||
@@ -35,12 +36,18 @@ String.prototype.truncate =
   };
 
 // GoogleGenerativeAI module
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+} = require("@google/generative-ai");
 const themeColor = "rgb(250, 245, 250)";
 
 export default function FoodView({ foods, setFoods, triggerOut }) {
   // Google Generative AI setup
-  const genAI = new GoogleGenerativeAI(process.env.EXPO_PUBLIC_GENAICOOKIE);
+  const genAI = new GoogleGenerativeAI(
+    "AIzaSyC_VN-PRLNa6wBcTfOScD-Y8asQz5kQp1w"
+  );
   const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
 
   // State variables
@@ -51,7 +58,6 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
   const [cMounted, mountC] = useState(true);
 
   const Tab = createMaterialTopTabNavigator();
-
   // toggles modal
   const toggleModal = () => {
     toggleModalVisibility(!modalVisibility);
@@ -60,7 +66,6 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
   const foodRender = ({ item }) => {
     let backCount = 0;
     let backTimer;
-
     return (
       <View style={styles.itemContainer}>
         <TouchableWithoutFeedback
@@ -98,7 +103,7 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
           }}
         >
           <Image
-            style={styles.image}
+            style={[styles.image, { backgroundColor: "red" }]}
             source={{ uri: item.imageURL }}
             contentFit="cover"
             transition={1000}
@@ -116,11 +121,12 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
   // Function to render carousel of food items
   const renderCarousel = () => {
     return (
-      <View style={styles.carousel}>
+      <View style={[styles.carousel, { flex: 1 }]}>
         <Carousel
           mode={"parallax"}
           data={foods}
           width={styles.carousel.width}
+          height={styles.carousel.height}
           scrollAnimationDuration={750}
           onSnapToItem={snapHandler}
           renderItem={foodRender}
@@ -194,20 +200,87 @@ export default function FoodView({ foods, setFoods, triggerOut }) {
   async function consultBard() {
     if (!(prompt == "")) {
       setResponse("Loading...");
+      const generationConfig = {
+        temperature: 0.9,
+        topK: 1,
+        topP: 1,
+        maxOutputTokens: 2048,
+      };
+
+      const safetySettings = [
+        {
+          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
+      ];
       try {
+        const chat = model.startChat({
+          generationConfig,
+          safetySettings,
+          history: [
+            {
+              role: "user",
+              parts: [
+                {
+                  text: "System prompt: You are a very successful and experienced nutritionist with a long career encouraging fitness and diet goals of humans. You are able to analyze foods very well based on both your own knowledge, and knowledge provided to you. You also happen to be funny sometimes. You also are completely unwilling to respond to anything unrelated to nutrition, health, and fitness; you will ONLY say 'I cannot answer questions that don't pertain to health, nutrition, and fitness' if those conditions are not met. Respond if you got it.",
+                },
+              ],
+            },
+            {
+              role: "model",
+              parts: [{ text: "Understood." }],
+            },
+            {
+              role: "user",
+              parts: [
+                {
+                  text:
+                    "Hi I have some diet/fitness goals regarding the following foods: " +
+                    JSON.stringify({ foodData: foods }),
+                },
+              ],
+            },
+            {
+              role: "model",
+              parts: [
+                {
+                  text: "Great! Glad to see you are interested in improving your health! Feel free to ask me any questions regarding the data you have provided and I will happily respond!",
+                },
+              ],
+            },
+          ],
+        });
+
+        const result = await chat.sendMessage(prompt);
+        const response = result.response;
+        /*
         initial =
           "Question: " +
           prompt +
           "\n\n Assume this data is correct: '" +
           JSON.stringify({ foodData: foods }) +
-          "'. Answer the question as best as possible using both the data provided OR any knowledge in your own database. Only answer relevant questions AND DO NOT try and interpret nonsensical questions. If a question is irrelevant or does not make sense, answer with 'I do not understand your question. Please rephrase.' Use ' ' instead of '_' when possible, use plain english, be concise but descriptive, use complete sentences, proffessional style, neutral tone, do not list data, avoid explicitly using object key names as a unit in the response (all nutrient measurements are per serving; do any necessary calculations based on that information)";
+          "'. Answer the question as best as possible using the data provided OR any knowledge in your own database. Only answer relevant questions AND DO NOT try and interpret nonsensical questions. If a question is irrelevant or does not make sense, answer with 'I do not understand your question. Please rephrase.' Use ' ' instead of '_' when possible, use plain english, be concise but descriptive, use complete sentences, proffessional style, neutral tone, do not list data, avoid explicitly using object key names as a unit in the response (all nutrient measurements are per serving; do any necessary calculations based on that information)";
         const result = await model.generateContent(initial);
         const response = await result.response;
+        */
         setResponse(response.text());
       } catch (err) {
         setResponse(
           "An error has occured. It's possible that the developer has been rate limited. If this is the case, try again later, or contact the developer for support."
         );
+        console.log(err);
       }
     } else {
       alert("Text input empty.");

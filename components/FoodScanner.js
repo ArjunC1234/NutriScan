@@ -3,14 +3,10 @@ import {
   Text,
   View,
   StyleSheet,
-  Button,
-  Platform,
-  TouchableOpacity,
   Alert,
 } from "react-native";
-import { PaperProvider, Portal, Snackbar } from "react-native-paper";
-import { CameraView, useCameraPermissions } from "expo-camera/next";
-import { VideoStabilization } from "expo-camera";
+import { Snackbar } from "react-native-paper";
+import { CameraView, useCameraPermissions } from "expo-camera";
 function isValidBarcode(value) {
   // We only allow correct length barcodes
   if (!value.match(/^(\d{8}|\d{12,14})$/)) {
